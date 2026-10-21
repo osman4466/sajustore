@@ -1,30 +1,61 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:confectionary_sales/main.dart';
+import 'package:confectionary_sales/core/utils/date_helper.dart';
+import 'package:confectionary_sales/models/account.dart';
+import 'package:confectionary_sales/models/sale.dart';
+import 'package:confectionary_sales/models/sale_transaction.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  group('DateHelper Tests', () {
+    test('Converts English digits to Bangla digits correctly', () {
+      expect(DateHelper.toBanglaDigits(12345), '১২৩৪৫');
+      expect(DateHelper.toBanglaDigits(0), '০');
+      expect(DateHelper.toBanglaDigits(9876), '৯৮৭৬');
+    });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    test('Formats currency properly with Taka symbol', () {
+      expect(DateHelper.formatCurrency(500.0), '৳ 500');
+      expect(DateHelper.formatCurrency(120.50), '৳ 120.50');
+    });
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  group('Model Serialization Tests', () {
+    test('Account toMap and fromMap works correctly', () {
+      final account = Account(id: 1, name: 'রহিম মিষ্টি ঘর', phone: '01700000000');
+      final map = account.toMap();
+      final parsed = Account.fromMap(map);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      expect(parsed.id, 1);
+      expect(parsed.name, 'রহিম মিষ্টি ঘর');
+      expect(parsed.phone, '01700000000');
+    });
+
+    test('Sale toMap and fromMap works correctly', () {
+      final sale = Sale(id: 10, transactionId: 5, productName: 'রসগোল্লা', amount: 350.0);
+      final map = sale.toMap();
+      final parsed = Sale.fromMap(map);
+
+      expect(parsed.id, 10);
+      expect(parsed.transactionId, 5);
+      expect(parsed.productName, 'রসগোল্লা');
+      expect(parsed.amount, 350.0);
+    });
+
+    test('SaleTransaction toMap and fromMap works correctly', () {
+      final transaction = SaleTransaction(
+        id: 7,
+        type: 'cash',
+        totalAmount: 1250.0,
+        date: '21-10-2026, 12:30 PM',
+        sortableDate: '2026-10-21',
+      );
+      final map = transaction.toMap();
+      final parsed = SaleTransaction.fromMap(map);
+
+      expect(parsed.id, 7);
+      expect(parsed.type, 'cash');
+      expect(parsed.totalAmount, 1250.0);
+      expect(parsed.isCash, isTrue);
+      expect(parsed.isAccount, isFalse);
+    });
   });
 }

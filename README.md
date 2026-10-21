@@ -1,56 +1,112 @@
-# মিষ্টির দোকান হিসাব অ্যাপ - প্রজেক্ট নোট
+# 🏪 Saju Store - Confectionary & Grocery Sales Management App
 
-## অ্যাপের উদ্দেশ্য
-একটা মুদি/মিষ্টির দোকানের বিক্রয় হিসাব রাখার Flutter অ্যাপ। দুই ধরনের বিক্রয়:
-- ক্যাশ সেল (তাৎক্ষণিক টাকা)
-- একাউন্ট সেল (বাকি, নির্দিষ্ট গ্রাহকের নামে জমা থাকে) — গ্রাহক পরে টাকা জমা দিলে সেটাও আলাদা "জমা" লেনদেন হিসেবে সেভ হয় এবং বাকি থেকে বিয়োগ হয়
+[![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter)](https://flutter.dev)
+[![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart)](https://dart.dev)
+[![License](https://img.shields.io/badge/License-Proprietary-green)](#)
 
-একজন কাস্টমার একসাথে অনেক পণ্য কিনলে, সবগুলো মিলে একটাই "লেনদেন" (transaction) হিসেবে গণ্য হয়। অ্যাপ ১০-১৫ বছর ব্যবহারের জন্য বানানো হচ্ছে।
+A high-performance, offline-first Flutter application tailored for sweet shops, grocery stores, and confectionaries (মুদি ও মিষ্টির দোকান). Built with SQLite for robust, long-term offline accounting, daily/monthly analytics, customer credit (বাকি) tracking, and cash sale receipts.
 
-## ডেটাবেজ গঠন (৩টা টেবিল)
-- **accounts** — গ্রাহকের তথ্য (id, name, phone)
-- **transactions** — একটা লেনদেন/রশিদ (id, type: cash/account/payment, accountId, totalAmount, date, sortableDate)
-  - `date` = দেখানোর জন্য ফরম্যাট করা তারিখ-সময় (যেমন "16-07-2026, 02:35 PM")
-  - `sortableDate` = কম্পিউটার-বান্ধব তারিখ (যেমন "2026-07-16") — আজকের/মাসের হিসাব বের করার জন্য ব্যবহার হয়
-  - `type = 'payment'` মানে এটা বাকি শোধ করার জমা, পণ্য কেনা না
-- **sales** — লেনদেনের ভেতরের প্রতিটা পণ্য (id, transactionId, productName, amount)
+---
 
-একটা transaction-এর সাথে একাধিক sale (পণ্য) লিংক থাকে (transactionId দিয়ে)।
+## 🌟 Key Features
 
-## ফাইল স্ট্রাকচার
-- `lib/models/sale.dart` — একটা পণ্যের লাইন আইটেমের ব্লুপ্রিন্ট
-- `lib/models/account.dart` — গ্রাহকের (একাউন্টের) ব্লুপ্রিন্ট
-- `lib/models/sale_transaction.dart` — একটা লেনদেন/রশিদের ব্লুপ্রিন্ট (type, accountId, totalAmount, date, sortableDate)
-- `lib/db/database_helper.dart` — SQLite ডেটাবেজ, সব সেভ/লোড/আপডেট ফাংশন এখানে। উল্লেখযোগ্য ফাংশন:
-  - `getAllAccountDues()` — এক ধাক্কায় সব গ্রাহকের বাকি হিসাব করে (SQL GROUP BY দিয়ে, প্রতি গ্রাহকের জন্য আলাদা প্রশ্ন করে না, তাই বহু বছর পরও দ্রুত থাকবে)
-  - `getSalesSummary(datePattern)` — নির্দিষ্ট তারিখ/মাসের জন্য মোট বিক্রয়, ক্যাশ প্রাপ্তি, বাকির বিক্রয় বের করে
-  - `updateTransaction`, `deleteSalesForTransaction` — এডিট ফিচারের জন্য
-- `lib/utils/date_helper.dart` — বাংলা, ইংরেজি ও হিজরি (আরবি, বাংলা সংখ্যায়) তারিখ বের করার ফাংশন
-- `lib/screens/home_screen.dart` — হোম স্ক্রিন: উপরে দোকানের নাম ও ৩টা তারিখ (বাংলা/ইংরেজি/হিজরি), তার নিচে "ক্যাশ সেল" ও "একাউন্ট সেল" ফুল-width বাটন, তার নিচে "আজকের হিসাব" ও মাস বাছাইযোগ্য "মাসের হিসাব" (প্রতিটায় মোট বিক্রয়/ক্যাশ বিক্রয়/বাকির বিক্রয়)
-- `lib/screens/cash_sales_screen.dart` — সব ক্যাশ লেনদেনের লিস্ট, ক্লিক করলে পপ-আপে বিবরণ ও এডিট অপশন, নিচে + বাটন দিয়ে নতুন এন্ট্রি
-- `lib/screens/add_cash_sale_screen.dart` — একাধিক পণ্যসহ ক্যাশ সেল যোগ/এডিট করার ফর্ম (নতুন ও এডিট দুই মোডেই কাজ করে)
-- `lib/screens/account_list_screen.dart` — সব গ্রাহকের তালিকা (প্রতি গ্রাহকের বাকিসহ), উপরে "সর্বমোট বাকি", নতুন গ্রাহক তৈরি
-- `lib/screens/account_detail_screen.dart` — একজন গ্রাহকের সব লেনদেন (কেনা + জমা, আলাদা রঙে/আইকনে), মোট বাকি, উপরে ডান কোণায় নাম/ফোন এডিট বাটন, নিচে ফুল-width "নতুন এন্ট্রি" ও "টাকা জমা" বাটন
-- `lib/screens/add_account_sale_screen.dart` — একাধিক পণ্যসহ বাকি এন্ট্রি যোগ/এডিট করার ফর্ম
+- **💵 Cash Sales (ক্যাশ সেল):**
+  - Record multi-item single-receipt transactions with live subtotal calculation.
+  - View full itemized receipts with edit and delete capabilities.
+- **📒 Customer Accounts & Credit Ledger (বাকি খাতা):**
+  - Manage customer profiles with names and phone numbers.
+  - Instant customer search by name or contact number.
+  - Record credit purchases and payments (টাকা জমা) with automated balance deduction.
+- **📊 Business Dashboard & Analytics:**
+  - Real-time today's summary: Total sales, cash received, and credit outstanding.
+  - Month-over-month browsing with dynamic historical calculations.
+  - Multi-calendar header display: **Bangla (বাংলা সন)**, **Gregorian (ইংরেজি)**, and **Hijri (হিজরি সন)** dates.
+- **🛡️ Data Integrity & Atomicity:**
+  - Database operations use atomic SQLite transactions (`db.transaction`) to prevent partial or corrupted saves.
+  - Fast indexed queries utilizing SQL aggregations (`GROUP BY`, `SUM`) designed for 10-15+ years of operational records.
 
-## এখন পর্যন্ত যা হয়েছে (কাজ করছে ✅)
-- ডেটাবেজ সেটআপ (accounts, transactions, sales), Transaction সিস্টেম (একসাথে একাধিক পণ্য = একটা লেনদেন)
-- ক্যাশ সেল ও একাউন্ট সেল — একসাথে একাধিক পণ্য যোগ, লাইভ টোটাল
-- একাউন্ট (গ্রাহক) তৈরি, তালিকা, প্রতিটার বাকি দেখানো, নাম/ফোন এডিট, সর্বমোট বাকি
-- বাকি শোধ করার "টাকা জমা" ফিচার (আলাদা লেনদেন হিসেবে, বাকি থেকে বিয়োগ হয়)
-- লেনদেন এডিট করার ফিচার (পপ-আপ থেকে "এডিট করুন" → আগের ডেটাসহ ফর্ম খোলে → আপডেট হয়)
-- হোম স্ক্রিনে দোকানের নাম + বাংলা/ইংরেজি/হিজরি তারিখ (প্রতিদিন অটো-আপডেট)
-- হোম স্ক্রিনে "আজকের হিসাব" ও মাস-বাছাইযোগ্য "মাসের হিসাব" (মোট বিক্রয়, ক্যাশ বিক্রয়, বাকির বিক্রয়)
-- ক্যাশ সেল এখন আলাদা পেজে (cash_sales_screen.dart) — হোম স্ক্রিনে শুধু সামারি ও বাটন
+---
 
-## ⚠️ গুরুত্বপূর্ণ কারিগরি নোট
-- ডেটাবেজে আর অটোমেটিক ডেটা ডিলিট হয় না (`deleteDatabase` লাইন সরানো হয়েছে) — ডেটা স্থায়ীভাবে থাকে
-- `sortableDate` কলাম (yyyy-MM-dd ফরম্যাট) যোগ করা হয়েছে আজকের/মাসের হিসাব নির্ভুলভাবে বের করার জন্য। এই কলাম যোগ করার আগের এন্ট্রিগুলোতে এটা খালি থাকবে, তাই সেগুলো আজকের/মাসের সামারিতে গণনায় আসবে না।
-- একাউন্ট তালিকা ও ড্যাশবোর্ডের মতো হিসাব সবসময় SQL দিয়ে (GROUP BY, SUM ব্যবহার করে) এক ধাক্কায় বের করা হয়, Dart কোডে লুপ চালিয়ে না — এতে গ্রাহক/লেনদেন বহু বছরে অনেক বাড়লেও অ্যাপ দ্রুত থাকবে
+## 🏗️ Project Architecture
 
-## পরিকল্পনা (এখনো বাকি)
-- বাম-উপর কোণায় ৩-ডট মেনু → সাইডবার → "ড্যাশবোর্ড" পেজ (আলোচনা হয়েছে, এখনো শুরু হয়নি)
-- ব্যাকআপ ফিচার (ফোন হারালে/নষ্ট হলে ডেটা যেন না হারায়) — ১০-১৫ বছর ব্যবহারের জন্য সবচেয়ে জরুরি ফিচার হিসেবে চিহ্নিত করা হয়েছে
-- ডেটাবেজ migration ব্যবস্থা (ভবিষ্যতে নতুন কলাম/ফিচার নিরাপদে যোগ করতে)
-- অ্যাপ আইকন ও নাম কাস্টমাইজ করা
-- (ঐচ্ছিক) সবচেয়ে বেশি বাকি থাকা শীর্ষ গ্রাহকদের তালিকা, বিক্রয়ের গ্রাফ/চার্ট
+The codebase follows a clean, feature-first modular architecture for maintainability and scalability:
+
+```text
+lib/
+├── core/
+│   ├── constants/              # Reusable app colors, strings, and styling tokens
+│   │   ├── app_colors.dart
+│   │   ├── app_strings.dart
+│   │   └── app_styles.dart
+│   ├── database/               # SQLite helper with atomic transactions & CRUD operations
+│   │   └── database_helper.dart
+│   ├── theme/                  # Material 3 custom theme configuration
+│   │   └── app_theme.dart
+│   └── utils/                  # Multi-calendar date helpers (Bangla, English, Hijri)
+│       └── date_helper.dart
+├── models/                     # Data models with immutability and serialization
+│   ├── account.dart
+│   ├── sale.dart
+│   └── sale_transaction.dart
+├── screens/
+│   ├── home/                   # Main dashboard, summary cards & calendar header
+│   │   ├── home_screen.dart
+│   │   └── widgets/
+│   │       ├── date_header_card.dart
+│   │       └── summary_card.dart
+│   ├── cash_sales/             # Cash sales ledger and multi-item receipt creation
+│   │   ├── cash_sales_screen.dart
+│   │   └── add_cash_sale_screen.dart
+│   ├── accounts/               # Customer account list, ledger details, and credit sale entry
+│   │   ├── account_list_screen.dart
+│   │   ├── account_detail_screen.dart
+│   │   └── add_account_sale_screen.dart
+│   └── common/                 # Reusable UI components & dialogs
+│       └── widgets/
+│           ├── confirm_dialog.dart
+│           ├── product_entry_item.dart
+│           └── transaction_detail_dialog.dart
+└── main.dart                   # Application entry point
+```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- [Flutter SDK](https://flutter.dev/docs/get-started/install) (v3.19 or higher)
+- Android Studio / VS Code with Flutter extension
+- Android device or emulator
+
+### Installation & Run
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/osman4466/sajustore.git
+   cd sajustore
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Run the application:**
+   ```bash
+   flutter run
+   ```
+
+---
+
+## 🗃️ Database Schema
+
+| Table | Columns | Description |
+| :--- | :--- | :--- |
+| **accounts** | `id`, `name`, `phone` | Stores customer profile details. |
+| **transactions** | `id`, `type`, `accountId`, `totalAmount`, `date`, `sortableDate` | Stores single transactions (`cash`, `account`, or `payment`). |
+| **sales** | `id`, `transactionId`, `productName`, `amount` | Itemized line-items linked to a parent transaction. |
+
+---
+
+## 📝 Documentation
+For additional project specifications and roadmap notes, see [`docs/PROJECT_NOTES.md`](docs/PROJECT_NOTES.md).

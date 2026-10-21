@@ -1,23 +1,23 @@
-
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+import 'core/constants/app_strings.dart';
+import 'core/theme/app_theme.dart';
+import 'screens/home/home_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(const SajuConfectioneryApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class SajuConfectioneryApp extends StatelessWidget {
+  const SajuConfectioneryApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Saju Store',
+      title: AppStrings.appName,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.green, useMaterial3: true),
+      theme: AppTheme.lightTheme,
       home: const HomeScreen(),
     );
   }
 }
-
-
